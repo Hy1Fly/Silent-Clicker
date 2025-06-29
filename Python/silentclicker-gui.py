@@ -1,5 +1,7 @@
-#you need "pip install pynput psutil pywin32 ttkthemes" in cmd.exe
-#I use PyInstaller for packaging
+#you need "pip install pynput psutil pywin32 ttkthemes PyInstaller" in cmd.exe
+#and I use PyInstaller for package
+
+#This is 2.0.1 ver code 20250629-2
 import time
 import threading
 import random
@@ -12,7 +14,6 @@ from tkinter import ttk, Frame, Label, Scale, Button as TkButton, Entry, Checkbu
 
 class SilentClicker:
     def __init__(self):
-
         self.threshold_cps = 7
         self.max_cps = 20
         self.randomness = 0.3
@@ -20,46 +21,38 @@ class SilentClicker:
         self.hide_position = (0, 0)
         
         self.mouse = Controller()
-        self.user_clicks = deque()  
-        self.auto_clicks = deque()  
+        self.user_clicks = deque()
+        self.auto_clicks = deque()
         self.running = False
         self.auto_active = False
         self.click_lock = threading.Lock()
         
-
         self.listener = Listener(on_click=self.on_click)
         self.listener.start()
         
-
         self.monitor_thread = None
         self.auto_thread = None
         
-
         self.create_gui()
         print("Silent-Clicker initialized. Press F1 to hide/show GUI.")
     
     def create_gui(self):
-        """创建暗黑色主题的GUI界面"""
         self.root = tk.Tk()
-        self.root.title(" ")
+        self.root.title("AutoClicker Settings")
         self.root.geometry("400x450")
         self.root.configure(bg="#121212")
         self.root.resizable(False, False)
         
-
         try:
-            self.root.iconbitmap("icon.ico") 
+            self.root.iconbitmap("icon.ico")
         except:
             pass
         
-
         self.root.bind("<F1>", self.toggle_gui)
         
-
         style = ttk.Style()
         style.theme_use('clam')
         
-
         style.configure("TFrame", background="#121212")
         style.configure("TLabel", background="#121212", foreground="#e0e0e0", font=("Arial", 10))
         style.configure("TScale", background="#121212", foreground="#bb86fc")
@@ -67,16 +60,13 @@ class SilentClicker:
         style.configure("TButton", background="#3700B3", foreground="white", font=("Arial", 10, "bold"))
         style.map("TButton", background=[("active", "#6200EE")])
         
-        # 主框架
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # 标题
         title = Label(main_frame, text="SILENT-CLICKER", font=("Arial", 16, "bold"), 
                      fg="#bb86fc", bg="#121212")
         title.pack(pady=(0, 15))
         
-        # 阈值
         threshold_frame = Frame(main_frame, bg="#121212")
         threshold_frame.pack(fill=tk.X, pady=5)
         
@@ -87,7 +77,6 @@ class SilentClicker:
                                 troughcolor="#333333", highlightbackground="#121212")
         threshold_slider.pack(fill=tk.X)
         
-
         maxcps_frame = Frame(main_frame, bg="#121212")
         maxcps_frame.pack(fill=tk.X, pady=5)
         
@@ -98,7 +87,6 @@ class SilentClicker:
                              troughcolor="#333333", highlightbackground="#121212")
         maxcps_slider.pack(fill=tk.X)
         
-
         randomness_frame = Frame(main_frame, bg="#121212")
         randomness_frame.pack(fill=tk.X, pady=5)
         
@@ -109,57 +97,46 @@ class SilentClicker:
                                  troughcolor="#333333", highlightbackground="#121212")
         randomness_slider.pack(fill=tk.X)
         
-
         self.status_var = tk.StringVar(value="Status: Stopped")
         status_label = Label(main_frame, textvariable=self.status_var, 
                            font=("Arial", 10, "bold"), fg="#03DAC5", bg="#121212")
         status_label.pack(pady=10)
         
-
         button_frame = Frame(main_frame, bg="#121212")
         button_frame.pack(fill=tk.X, pady=15)
         
-
         self.toggle_button = TkButton(button_frame, text="Start AutoClicker", command=self.toggle_autoclicker,
                                     bg="#3700B3", fg="white", relief=tk.FLAT, padx=15)
         self.toggle_button.pack(side=tk.LEFT, padx=5)
         
-
         hide_button = TkButton(button_frame, text="Hide GUI (F1)", command=self.hide_gui_window,
                              bg="#333333", fg="white", relief=tk.FLAT, padx=15)
         hide_button.pack(side=tk.RIGHT, padx=5)
         
-
         self.hide_label = Label(main_frame, text="Hidden position: (0, 0)", 
                                fg="#666666", bg="#121212", font=("Arial", 8))
         self.hide_label.pack(pady=(10, 0))
         
-
         footer = Label(main_frame, text="Silent-Clicker v1.1 | Press F1 to toggle GUI", 
                      fg="#666666", bg="#121212", font=("Arial", 8))
         footer.pack(side=tk.BOTTOM, pady=(10, 0))
     
     def on_click(self, x, y, button, pressed):
-        """处理用户点击事件"""
         if button == Button.left and pressed:
             with self.click_lock:
                 now = time.time()
                 self.user_clicks.append(now)
-
                 while self.user_clicks and now - self.user_clicks[0] > 1.0:
                     self.user_clicks.popleft()
     
     def get_current_user_cps(self):
-        """计算当前用户CPS"""
         with self.click_lock:
-
             now = time.time()
             while self.user_clicks and now - self.user_clicks[0] > 1.0:
                 self.user_clicks.popleft()
             return len(self.user_clicks)
     
     def get_total_cps(self):
-        """计算总CPS（用户+自动）"""
         now = time.time()
         with self.click_lock:
             user_count = sum(1 for t in self.user_clicks if now - t <= 1.0)
@@ -167,16 +144,13 @@ class SilentClicker:
             return user_count + auto_count
     
     def monitor_cps(self):
-        """监控用户CPS并更新自动点击状态"""
         while self.running:
-
             self.threshold_cps = self.threshold_var.get()
             self.max_cps = self.maxcps_var.get()
             self.randomness = self.randomness_var.get()
             
             user_cps = self.get_current_user_cps()
             
-
             if user_cps >= self.threshold_cps:
                 if not self.auto_active:
                     print(f"User CPS: {user_cps} >= threshold. Activating auto-click.")
@@ -188,73 +162,56 @@ class SilentClicker:
                     self.auto_active = False
                     self.status_var.set(f"Status: Waiting ({user_cps} CPS)")
             
-            time.sleep(0.1)  # 每100ms检查一次
+            time.sleep(0.1)
     
     def humanized_interval(self, base_interval):
-        """生成人性化的点击间隔"""
-
         rand_factor = 1 + random.uniform(-self.randomness, self.randomness)
         interval = base_interval * rand_factor
         
-
-        if random.random() < 0.05:  # 5%的概率触发双击
+        if random.random() < 0.05:
             interval *= 0.2
         
-
         return max(interval, 0.01)
     
     def auto_click_loop(self):
-        """自动点击主循环"""
         while self.running:
             if self.auto_active:
-
                 current_cps = self.get_total_cps()
                 available_cps = max(0, self.max_cps - current_cps)
                 
                 if available_cps > 0:
-
                     base_interval = 1.0 / available_cps
                     
-
                     interval = self.humanized_interval(base_interval)
                     
-
                     self.mouse.press(Button.left)
                     self.mouse.release(Button.left)
                     
-
                     with self.click_lock:
                         now = time.time()
                         self.auto_clicks.append(now)
-                        # 清理
                         while self.auto_clicks and now - self.auto_clicks[0] > 2.0:
                             self.auto_clicks.popleft()
                     
-
                     time.sleep(interval)
                 else:
-
                     time.sleep(0.05)
             else:
-
                 time.sleep(0.1)
     
     def toggle_autoclicker(self):
-        """切换自动点击器状态"""
         if not self.running:
             self.start_autoclicker()
         else:
             self.stop_autoclicker()
     
     def start_autoclicker(self):
-        """启动自动点击器"""
         if self.running:
             return
         
         self.running = True
         self.auto_active = False
         
-# 创建并启动新线程
         self.monitor_thread = threading.Thread(target=self.monitor_cps, daemon=True)
         self.monitor_thread.start()
         
@@ -266,21 +223,18 @@ class SilentClicker:
         print("AutoClicker started.")
     
     def stop_autoclicker(self):
-        """停止自动点击器"""
         if not self.running:
             return
         
         self.running = False
         self.auto_active = False
         
-
         if self.monitor_thread and self.monitor_thread.is_alive():
             self.monitor_thread.join(timeout=0.5)
         
         if self.auto_thread and self.auto_thread.is_alive():
             self.auto_thread.join(timeout=0.5)
         
-
         self.monitor_thread = None
         self.auto_thread = None
         
@@ -289,23 +243,19 @@ class SilentClicker:
         print("AutoClicker stopped.")
     
     def hide_gui_window(self, event=None):
-        """隐藏GUI窗口"""
         if not self.hide_gui:
-
             self.hide_position = (self.root.winfo_x(), self.root.winfo_y())
-            self.root.withdraw()  # Hide!
+            self.root.withdraw()
             self.hide_gui = True
             self.hide_label.config(text=f"Hidden position: {self.hide_position}")
             print(f"GUI hidden at position: {self.hide_position}")
         else:
-
             self.root.deiconify()
             self.root.geometry(f"+{self.hide_position[0]}+{self.hide_position[1]}")
             self.hide_gui = False
             print("GUI restored")
     
     def toggle_gui(self, event=None):
-        """切换GUI显示状态"""
         if self.hide_gui:
             self.root.deiconify()
             self.root.geometry(f"+{self.hide_position[0]}+{self.hide_position[1]}")
@@ -319,21 +269,17 @@ class SilentClicker:
             print(f"GUI hidden at position: {self.hide_position}")
     
     def run(self):
-        """运行主程序"""
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.mainloop()
     
     def on_close(self):
-        """关闭窗口时的处理"""
         self.stop_autoclicker()
         self.listener.stop()
         self.root.destroy()
         print("Silent-Clicker closed.")
         sys.exit(0)
 
-
 if __name__ == "__main__":
     print("Starting Silent-Clicker...")
     clicker = SilentClicker()
     clicker.run()
-
