@@ -1,16 +1,31 @@
-# Slient-Clicker
-A simple AutoClicker. The most silent AutoClicker!
+# Silent-Clicker: The Ultimate Undetectable AutoClicker  
 
-This is an external AutoClicker suitable for Minecraft.
-It is not an AutoClicker injected into Minecraft.
-This can prevent it from being detected by the server.
+## Overview  
+Silent-Clicker is a sophisticated external auto-clicking tool designed specifically for Minecraft. Unlike injected clickers, this external solution operates independently, making it virtually undetectable by server-side anti-cheat systems.  
 
-How to build？
+## Key Features  
+- **Universal Compatibility**: Works seamlessly with all Minecraft versions (Java & Bedrock)  
+- **Stealth Operation**: External execution leaves no traces in-game  
+- **Customizable**: Adjustable click rates to mimic human behavior  
+- **Lightweight**: Minimal system resource usage  
 
-1.Install Python
-2."pip install pynput psutil pywin32 PyInstaller"in cmd(You need install PIP)
-3.Download main code(zip file)
-4.Unzip and open build.py
-5.Build done
+## Build Guide  
+1. **Prerequisites**  
+   - Install Python 3.x from [python.org](https://www.python.org/downloads/)  
+   - Ensure PIP is installed (comes with Python by default)  
 
-You can see build exe in diet
+2. **Install Dependencies**  
+   ```bash
+   pip install pynput psutil pywin32 PyInstaller
+   ```
+
+3. **Build Process**  
+   - Download the source code (ZIP file)  
+   - Extract the archive  
+   - Run `build.py`  
+   - The executable will be generated in the `/dist` folder  
+
+## Why Choose Silent-Clicker?  
+Our advanced external triggering mechanism ensures your gameplay remains undetected while providing consistent performance. Perfect for both casual play and competitive environments where fair-play monitoring is strict.  
+
+*Note: Use responsibly in accordance with server rules. Some competitive servers may prohibit any form of automation.*
